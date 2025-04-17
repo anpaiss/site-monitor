@@ -4,37 +4,56 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Monitoraggio Siti</title>
-  <link rel="stylesheet" href="assets/style.css"/>
+  <title>Check siti web</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; background: #f4f4f4; }
+    table { border-collapse: collapse; width: 100%; background: white; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+    th { background-color: #eee; }
+  </style>
 </head>
 <body>
   <h1>Monitoraggio Siti Web</h1>
-  <button onclick="eseguiTest()">EFFETTUA TEST</button>
-  <div id="risultati"></div>
+  <p>Elenco domini caricati da Google Sheet:</p>
+  <table>
+    <thead>
+      <tr><th>Dominio</th></tr>
+    </thead>
+    <tbody id="result-table">
+      <tr><td>Caricamento...</td></tr>
+    </tbody>
+  </table>
 
   <script>
-    function eseguiTest() {
-      const risultatiDiv = document.getElementById('risultati');
-      risultatiDiv.innerHTML = 'Caricamento in corso...';
+    const API_URL = "https://www.zahntechnik.ch/check-sites.php";
 
-      fetch('https://www.zahntechnik.ch/check-sites.php')
-        .then(response => response.json())
-        .then(data => {
-          risultatiDiv.innerHTML = '';
-          if (Array.isArray(data)) {
-            data.forEach(item => {
-              const row = document.createElement('div');
-              row.textContent = `${item.domain}: ${item.status}`;
-              risultatiDiv.appendChild(row);
-            });
-          } else {
-            risultatiDiv.innerHTML = 'Formato dati non valido';
-          }
-        })
-        .catch(error => {
-          risultatiDiv.innerHTML = 'Errore durante il test: ' + error.message;
-        });
-    }
+    fetch(API_URL)
+      .then(response => {
+        if (!response.ok) throw new Error("Errore nella richiesta");
+        return response.json();
+      })
+      .then(data => {
+        const table = document.getElementById("result-table");
+        table.innerHTML = ""; // pulisce contenuto precedente
+
+        if (Array.isArray(data) && data.length > 0) {
+          data.forEach(site => {
+            const row = document.createElement("tr");
+            const cell = document.createElement("td");
+            cell.textContent = site;
+            row.appendChild(cell);
+            table.appendChild(row);
+          });
+        } else {
+          table.innerHTML = "<tr><td>Nessun dominio trovato</td></tr>";
+        }
+      })
+      .catch(error => {
+        console.error("Errore nel fetch:", error);
+        document.getElementById("result-table").innerHTML =
+          "<tr><td>Errore nel caricamento dei dati</td></tr>";
+      });
   </script>
 </body>
 </html>
+
