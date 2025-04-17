@@ -17,7 +17,7 @@
       const risultatiDiv = document.getElementById('risultati');
       risultatiDiv.innerHTML = 'Caricamento in corso...';
 
-      fetch('https://paissan.com/check-sites.php')
+      fetch('https://www.zahntechnik.ch/check-sites.php')
         .then(response => response.json())
         .then(data => {
           risultatiDiv.innerHTML = '';
