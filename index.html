@@ -32,7 +32,7 @@
       const url = `https://${domain}/nf-check.html`;
       try {
         const res = await fetch(url, { method: 'HEAD', mode: 'no-cors' });
-        // ATTENZIONE: con no-cors fetch "silente", quindi assumiamo che se non errore → online
+        // ATTENZIONE: in modalità no-cors non possiamo leggere lo status della risposta
         return 'online';
       } catch (err) {
         return 'offline';
@@ -48,4 +48,30 @@
         table.innerHTML = "";
 
         for (const domain of domains) {
-          const
+          const tr = document.createElement("tr");
+          const tdDomain = document.createElement("td");
+          const tdStatus = document.createElement("td");
+
+          tdDomain.textContent = domain;
+          tdStatus.textContent = "Verifica...";
+          tdStatus.classList.add("checking");
+
+          tr.appendChild(tdDomain);
+          tr.appendChild(tdStatus);
+          table.appendChild(tr);
+
+          checkSiteStatus(domain).then(status => {
+            tdStatus.textContent = status;
+            tdStatus.className = status; // aggiunge classe online/offline
+          });
+        }
+      } catch (err) {
+        console.error("Errore durante il caricamento dei domini:", err);
+        document.getElementById("result-table").innerHTML = "<tr><td colspan='2'>Errore nel caricamento dei dati.</td></tr>";
+      }
+    }
+
+    loadAndCheckSites();
+  </script>
+</body>
+</html>
