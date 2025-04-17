@@ -1,0 +1,40 @@
+
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Monitoraggio Siti</title>
+  <link rel="stylesheet" href="assets/style.css"/>
+</head>
+<body>
+  <h1>Monitoraggio Siti Web</h1>
+  <button onclick="eseguiTest()">EFFETTUA TEST</button>
+  <div id="risultati"></div>
+
+  <script>
+    function eseguiTest() {
+      const risultatiDiv = document.getElementById('risultati');
+      risultatiDiv.innerHTML = 'Caricamento in corso...';
+
+      fetch('https://paissan.com/check-sites.php')
+        .then(response => response.json())
+        .then(data => {
+          risultatiDiv.innerHTML = '';
+          if (Array.isArray(data)) {
+            data.forEach(item => {
+              const row = document.createElement('div');
+              row.textContent = `${item.domain}: ${item.status}`;
+              risultatiDiv.appendChild(row);
+            });
+          } else {
+            risultatiDiv.innerHTML = 'Formato dati non valido';
+          }
+        })
+        .catch(error => {
+          risultatiDiv.innerHTML = 'Errore durante il test: ' + error.message;
+        });
+    }
+  </script>
+</body>
+</html>
