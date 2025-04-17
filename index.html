@@ -28,50 +28,34 @@
   <script>
     const API_URL = "https://www.zahntechnik.ch/check-sites.php";
 
-    async function checkSiteStatus(domain) {
-      const url = `https://${domain}/nf-check.html`;
-      try {
-        const res = await fetch(url, { method: 'HEAD', mode: 'no-cors' });
-        // ATTENZIONE: in modalità no-cors non possiamo leggere lo status della risposta
-        return 'online';
-      } catch (err) {
-        return 'offline';
-      }
-    }
-
-    async function loadAndCheckSites() {
+    async function loadSites() {
       try {
         const response = await fetch(API_URL);
-        const domains = await response.json();
+        const data = await response.json();
 
         const table = document.getElementById("result-table");
         table.innerHTML = "";
 
-        for (const domain of domains) {
+        for (const entry of data) {
           const tr = document.createElement("tr");
           const tdDomain = document.createElement("td");
           const tdStatus = document.createElement("td");
 
-          tdDomain.textContent = domain;
-          tdStatus.textContent = "Verifica...";
-          tdStatus.classList.add("checking");
+          tdDomain.textContent = entry.domain;
+          tdStatus.textContent = entry.status;
+          tdStatus.className = entry.status;
 
           tr.appendChild(tdDomain);
           tr.appendChild(tdStatus);
           table.appendChild(tr);
-
-          checkSiteStatus(domain).then(status => {
-            tdStatus.textContent = status;
-            tdStatus.className = status; // aggiunge classe online/offline
-          });
         }
       } catch (err) {
-        console.error("Errore durante il caricamento dei domini:", err);
+        console.error("Errore nel caricamento:", err);
         document.getElementById("result-table").innerHTML = "<tr><td colspan='2'>Errore nel caricamento dei dati.</td></tr>";
       }
     }
 
-    loadAndCheckSites();
+    loadSites();
   </script>
 </body>
 </html>
