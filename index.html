@@ -1,59 +1,51 @@
-
 <!DOCTYPE html>
 <html lang="it">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Check siti web</title>
+  <title>Monitoraggio Siti Web</title>
   <style>
     body { font-family: sans-serif; padding: 20px; background: #f4f4f4; }
     table { border-collapse: collapse; width: 100%; background: white; }
     th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
     th { background-color: #eee; }
+    .online { color: green; font-weight: bold; }
+    .offline { color: red; font-weight: bold; }
   </style>
 </head>
 <body>
   <h1>Monitoraggio Siti Web</h1>
-  <p>Elenco domini caricati da Google Sheet:</p>
+  <p>Elenco domini e stato di raggiungibilità:</p>
   <table>
     <thead>
-      <tr><th>Dominio</th></tr>
+      <tr><th>Dominio</th><th>Stato</th></tr>
     </thead>
     <tbody id="result-table">
-      <tr><td>Caricamento...</td></tr>
+      <tr><td colspan="2">Caricamento...</td></tr>
     </tbody>
   </table>
 
   <script>
     const API_URL = "https://www.zahntechnik.ch/check-sites.php";
 
-    fetch(API_URL)
-      .then(response => {
-        if (!response.ok) throw new Error("Errore nella richiesta");
-        return response.json();
-      })
-      .then(data => {
+    async function checkSiteStatus(domain) {
+      const url = `https://${domain}/nf-check.html`;
+      try {
+        const res = await fetch(url, { method: 'HEAD', mode: 'no-cors' });
+        // ATTENZIONE: con no-cors fetch "silente", quindi assumiamo che se non errore → online
+        return 'online';
+      } catch (err) {
+        return 'offline';
+      }
+    }
+
+    async function loadAndCheckSites() {
+      try {
+        const response = await fetch(API_URL);
+        const domains = await response.json();
+
         const table = document.getElementById("result-table");
-        table.innerHTML = ""; // pulisce contenuto precedente
+        table.innerHTML = "";
 
-        if (Array.isArray(data) && data.length > 0) {
-          data.forEach(site => {
-            const row = document.createElement("tr");
-            const cell = document.createElement("td");
-            cell.textContent = site;
-            row.appendChild(cell);
-            table.appendChild(row);
-          });
-        } else {
-          table.innerHTML = "<tr><td>Nessun dominio trovato</td></tr>";
-        }
-      })
-      .catch(error => {
-        console.error("Errore nel fetch:", error);
-        document.getElementById("result-table").innerHTML =
-          "<tr><td>Errore nel caricamento dei dati</td></tr>";
-      });
-  </script>
-</body>
-</html>
-
+        for (const domain of domains) {
+          const
